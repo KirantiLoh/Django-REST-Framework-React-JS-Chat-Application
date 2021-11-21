@@ -30,7 +30,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["https://connectchatapp-backend.herokuapp.com", "http://127.0.0.1:8000", "http://localhost:8000"]
 
 
 # Application definition
@@ -142,7 +142,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:3000',
-    'http://127.0.0.1:3000',   
+    'http://127.0.0.1:3000',
+    'https://619a56d5281d3a5ae351e3dd--connect-chat.netlify.app',
+    'https://connect-chat.netlify.app/',   
 )
 
 
