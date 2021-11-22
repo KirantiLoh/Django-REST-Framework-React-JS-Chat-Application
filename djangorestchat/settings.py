@@ -139,13 +139,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # CORS Settings
-CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:3000',
     'http://127.0.0.1:3000',
-    'https://619a56d5281d3a5ae351e3dd--connect-chat.netlify.app',
     'https://connect-chat.netlify.app',   
 )
+CORS_ORIGIN_ALLOW_ALL = True
+
 
 
 # REST Framework Settings
