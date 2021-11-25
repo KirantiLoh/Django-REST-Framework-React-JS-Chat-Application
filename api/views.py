@@ -56,6 +56,7 @@ def rooms_view(request):
         except ObjectDoesNotExist:
             user = User.objects.get(username = data['creator'])
             room = Room.objects.create(name = data['name'], creator = user)
+            user.rooms.add(room)
             serializer = RoomSerializer(room, many =False)
             return Response(serializer.data)
 
