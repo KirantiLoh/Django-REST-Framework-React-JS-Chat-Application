@@ -67,7 +67,7 @@ def room_view(request, uid):
         room = Room.objects.get(uid=uid)
         cur_user = request.user
         if room.creator != cur_user or not cur_user.rooms.filter().exists:
-            return Response({'message':'You are not a member of this room'})
+            return Response({'message':'You are not a member of this room'}, status=status.HTTP_400_BAD_REQUEST)
     except ObjectDoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     if request.method == 'GET':
