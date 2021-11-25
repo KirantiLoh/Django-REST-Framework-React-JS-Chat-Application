@@ -66,9 +66,6 @@ def room_view(request, uid):
     try:
         room = Room.objects.get(uid=uid)
         cur_user = request.user
-        print(room.creator != cur_user)
-        print(room.members.filter(username = cur_user).exists())
-        print(room.creator != cur_user or room.members.filter(username = cur_user).exists())
         if not (room.creator != cur_user or room.members.filter(username = cur_user).exists()):
             return Response({'message':'You are not a member of this room'}, status=status.HTTP_400_BAD_REQUEST)
     except ObjectDoesNotExist:
@@ -97,25 +94,16 @@ def room_view(request, uid):
         room.delete()
         return Response({'message':'Room Deleted'})
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated,])
-def profiles_view(request):
-    user = User.objects.all()
-    serializer = UserSerializer(user, many = True)
-    return Response(serializer.data)
 
-@api_view(['GET', 'POST', 'PUT'])
+@api_view(['POST', 'PUT'])
 @permission_classes([IsAuthenticated,])
-def profile_view(request, username):
+def profile_view(request):
+    data = request.data
     try:
-        user = User.objects.get(username =username)
+        user = User.objects.get(username = data['user'])
     except ObjectDoesNotExist:
         return Response({'message':'User was not found'})
-    if request.method == 'GET':
-        serializer = UserSerializer(user, many = False)
-        return Response(serializer.data)
     if request.method == 'POST':
-        data = request.data
         try:
             room = Room.objects.get(uid = data['uid'])
             creator = User.objects.get(username = data['creator'])
