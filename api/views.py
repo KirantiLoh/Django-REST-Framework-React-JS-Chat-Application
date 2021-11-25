@@ -3,8 +3,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
-from .models import Room, Message
-from .serializers import MessageSerializer, RoomSerializer, MyTokenObtainPairSerializer, UserSerializer
+from .models import Profile, Room, Message, Profile
+from .serializers import MessageSerializer, ProfileSerializer, RoomSerializer, MyTokenObtainPairSerializer, UserSerializer
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth.models import User
@@ -36,6 +36,8 @@ def register_view(request):
             user = User.objects.create(username = data['username'], email=data['email'])
             user.set_password(data['password'])
             user.save()
+            profile = Profile.objects.create(user = user)
+            profile.save()
             serializer = UserSerializer(user, many = False)
             return Response(serializer.data, status = status.HTTP_200_OK)
 
@@ -43,9 +45,8 @@ def register_view(request):
 @permission_classes([IsAuthenticated,])
 def rooms_view(request):
     if request.method == 'GET':
-        # room = Room.objects.filter(creator = request.user)
-        room = Room.objects.all()
-        serializer = RoomSerializer(room, many = True)
+        rooms = request.user.rooms.all()
+        serializer = RoomSerializer(rooms, many = True)
         return Response(serializer.data)
     if request.method == 'POST':
         data = request.data
@@ -88,4 +89,50 @@ def room_view(request, uid):
     if request.method == 'DELETE':
         room.delete()
         return Response({'message':'Room Deleted'})
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated,])
+def profiles_view(request):
+    user = User.objects.all()
+    serializer = UserSerializer(user, many = True)
+    return Response(serializer.data)
+
+@api_view(['GET', 'POST', 'PUT'])
+@permission_classes([IsAuthenticated,])
+def profile_view(request, username):
+    try:
+        user = User.objects.get(username =username)
+    except ObjectDoesNotExist:
+        return Response({'message':'User was not found'})
+    if request.method == 'GET':
+        serializer = UserSerializer(user, many = False)
+        return Response(serializer.data)
+    if request.method == 'POST':
+        data = request.data
+        try:
+            room = Room.objects.get(uid = data['uid'])
+            creator = User.objects.get(username = data['creator'])
+            print(creator == room.creator)
+            if creator == room.creator:
+                user.rooms.add(room)
+                user.save()
+                print(user.rooms.all())
+                return Response({'message':'User has been added to room!'})
+            return Response({'message':'Error'})
+        except ObjectDoesNotExist:
+            return Response({'message':"Room doesn't exist"})
+    if request.method == 'PUT':
+        data = request.data
+        try:
+            room = Room.objects.get(uid = data['uid'])
+            creator = User.objects.get(username = data['creator'])
+            print(creator == room.creator)
+            if creator == room.creator:
+                user.rooms.remove(room)
+                user.save()
+                print(user.rooms.all())
+                return Response({'message':'User has been removed from the room!'})
+            return Response({'message':'Error'})
+        except ObjectDoesNotExist:
+            return Response({'message':"Room doesn't exist"})
 
