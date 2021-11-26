@@ -107,25 +107,21 @@ def profile_view(request):
         try:
             room = Room.objects.get(uid = data['uid'])
             creator = User.objects.get(username = data['creator'])
-            print(creator == room.creator)
             if creator == room.creator:
                 user.rooms.add(room)
                 user.save()
-                print(user.rooms.all())
                 return Response({'message':'User has been added to room!'})
             return Response({'message':'Error'})
         except ObjectDoesNotExist:
             return Response({'message':"Room doesn't exist"})
-    if request.method == 'PUT':
+    if request.method == "PUT":
         data = request.data
         try:
             room = Room.objects.get(uid = data['uid'])
             creator = User.objects.get(username = data['creator'])
-            print(creator == room.creator)
             if creator == room.creator:
                 user.rooms.remove(room)
                 user.save()
-                print(user.rooms.all())
                 return Response({'message':'User has been removed from the room!'})
             return Response({'message':'Error'})
         except ObjectDoesNotExist:
