@@ -95,7 +95,7 @@ def room_view(request, uid):
         return Response({'message':'Room Deleted'})
 
 
-@api_view(['POST', 'DELETE'])
+@api_view(['POST', 'PUT'])
 @permission_classes([IsAuthenticated,])
 def profile_view(request):
     data = request.data
@@ -116,7 +116,7 @@ def profile_view(request):
             return Response({'message':'Error'})
         except ObjectDoesNotExist:
             return Response({'message':"Room doesn't exist"})
-    if request.method == 'DELETE':
+    if request.method == 'PUT':
         data = request.data
         try:
             room = Room.objects.get(uid = data['uid'])
