@@ -107,6 +107,8 @@ def profile_view(request):
         try:
             room = Room.objects.get(uid = data['uid'])
             creator = User.objects.get(username = data['creator'])
+            if user.rooms.filter(uid = data['uid']).exists():
+                return Response({'message':'User is already a member of the room'})
             if creator == room.creator:
                 user.rooms.add(room)
                 user.save()
@@ -119,11 +121,12 @@ def profile_view(request):
         try:
             room = Room.objects.get(uid = data['uid'])
             creator = User.objects.get(username = data['creator'])
-            if creator == room.creator:
-                user.rooms.remove(room)
-                user.save()
-                return Response({'message':'User has been removed from the room!'})
-            return Response({'message':'Error'})
+            if user.rooms.filter(uid = data['uid']).exists():
+                if creator == room.creator:
+                    user.rooms.remove(room)
+                    user.save()
+                    return Response({'message':'User has been removed from the room!'})
+            return Response({'message':'User is not a member of the room'})
         except ObjectDoesNotExist:
             return Response({'message':"Room doesn't exist"})
 
