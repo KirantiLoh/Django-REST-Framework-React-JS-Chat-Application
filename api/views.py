@@ -95,9 +95,13 @@ def room_view(request, uid):
         return Response({'message':'Room Deleted'})
 
 
-@api_view(['POST', 'PUT'])
+@api_view(['GET', 'POST', 'PUT'])
 @permission_classes([IsAuthenticated,])
 def profile_view(request):
+    if request.method == 'GET':
+        profile = Profile.objects.get(user = request.user)
+        serializer = ProfileSerializer(profile, many = False)
+        return Response(serializer.data)
     data = request.data
     try:
         user = User.objects.get(username = data['user'])
