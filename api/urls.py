@@ -8,6 +8,7 @@ urlpatterns = [
     path('token/refresh', TokenRefreshView.as_view(), name='Refresh Token'),
     path('rooms', views.rooms_view, name='Rooms'),
     path('rooms/<uuid:uid>', views.room_view, name='Room'),
+    path('rooms/<uuid:uid>/members', views.room_members_view, name='Room Members'),
     path('profiles', views.profile_view, name='Profiles'),
     path('register', views.register_view, name='Register'),
 ]

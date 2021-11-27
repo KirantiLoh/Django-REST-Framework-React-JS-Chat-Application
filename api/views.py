@@ -9,6 +9,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth.models import User
 
+from api import serializers
+
 # Create your views here.
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
@@ -95,7 +97,7 @@ def room_view(request, uid):
         return Response({'message':'Room Deleted'})
 
 
-@api_view(['GET', 'POST', 'PUT'])
+@api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated,])
 def profile_view(request):
     if request.method == 'GET':
@@ -108,29 +110,48 @@ def profile_view(request):
     except ObjectDoesNotExist:
         return Response({'message':'User was not found'})
     if request.method == 'POST':
+        profile = Profile.objects.get(user = user)
+        print(data['image_str'])
+        profile.image_str = data['image_str']
+        profile.save()
+        serializer = ProfileSerializer(profile, many=False)
+        return Response(serializer.data)
+
+@api_view(['GET', 'POST', 'PUT'])
+@permission_classes([IsAuthenticated,])
+def room_members_view(request, uid):
+    try:
+            room = Room.objects.get(uid = uid)
+    except ObjectDoesNotExist:
+            return Response({'message':"Room doesn't exist"})
+    data = request.data
+    
+    if request.method == 'GET':
+        members = room.members
+        serializer = UserSerializer(members, many = True)
+        return Response(serializer.data)
+
+    if data:
         try:
-            room = Room.objects.get(uid = data['uid'])
+            user = User.objects.get(username = data['user'])
+        except ObjectDoesNotExist:
+            return Response({'message':'User was not found'})
+        
+        if request.method == 'POST':
             creator = User.objects.get(username = data['creator'])
-            if user.rooms.filter(uid = data['uid']).exists():
+            if user.rooms.filter(uid = uid).exists():
                 return Response({'message':'User is already a member of the room'})
             if creator == room.creator:
                 user.rooms.add(room)
                 user.save()
                 return Response({'message':'User has been added to room!'})
             return Response({'message':'Error'})
-        except ObjectDoesNotExist:
-            return Response({'message':"Room doesn't exist"})
-    if request.method == "PUT":
-        data = request.data
-        try:
-            room = Room.objects.get(uid = data['uid'])
+        if request.method == "PUT":
             creator = User.objects.get(username = data['creator'])
-            if user.rooms.filter(uid = data['uid']).exists():
+            if user.rooms.filter(uid = uid).exists():
                 if creator == room.creator:
                     user.rooms.remove(room)
                     user.save()
                     return Response({'message':'User has been removed from the room!'})
-            return Response({'message':'User is not a member of the room'})
-        except ObjectDoesNotExist:
-            return Response({'message':"Room doesn't exist"})
-
+                return Response({'message':'User is not a member of the room'})
+        
