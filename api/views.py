@@ -100,18 +100,15 @@ def room_view(request, uid):
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated,])
 def profile_view(request):
-    if request.method == 'GET':
-        profile = Profile.objects.get(user = request.user)
-        serializer = ProfileSerializer(profile, many = False)
-        return Response(serializer.data)
     data = request.data
     try:
-        user = User.objects.get(username = data['user'])
+        profile = Profile.objects.get(user = request.user)
     except ObjectDoesNotExist:
-        return Response({'message':'User was not found'})
+        return Response({'message':'No profile was found within that user'})
+    if request.method == 'GET':
+        serializer = ProfileSerializer(profile, many = False)
+        return Response(serializer.data)
     if request.method == 'POST':
-        profile = Profile.objects.get(user = user)
-        print(data['image_str'])
         profile.image_str = data['image_str']
         profile.save()
         serializer = ProfileSerializer(profile, many=False)
