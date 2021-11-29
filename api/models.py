@@ -37,7 +37,7 @@ class Message(models.Model):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    image_str = models.TextField(null=True, blank=True)
+    image_str = models.TextField(default='Default')
 
     def __str__(self):
         return f"{self.user}'s Profile"
